@@ -1,0 +1,7 @@
+flask
+youtube-dl
+yt_dlp
+serverless-wsgi
+werkzeug
+urllib3
+requests
