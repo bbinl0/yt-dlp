@@ -98,4 +98,6 @@ def handler(event, context):
     return handle_request(app, event, context)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Get port from environment variable (Railway/Heroku) or default to 5000 for development
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
