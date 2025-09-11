@@ -5,3 +5,4 @@ serverless-wsgi
 werkzeug
 urllib3
 requests
+gunicorn
