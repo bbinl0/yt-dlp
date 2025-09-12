@@ -2,7 +2,7 @@ import logging
 from flask import Flask, request
 from flask_restful import Resource, Api
 from werkzeug.exceptions import BadRequest
-from flask_cors import CORS  # Import CORS
+from flask_cors import CORS
 from youtube_service import YouTubeService
 
 # Configure logging
@@ -15,6 +15,19 @@ CORS(app)
 api = Api(app)
 youtube_service = YouTubeService()
 
+# --- New Route for Base URL ---
+@app.route('/')
+def home():
+    """
+    Handles requests to the base URL and provides API usage instructions.
+    """
+    return {
+        "message": "Welcome to the YouTube Video Info API!",
+        "usage": "Use the /video-info endpoint to get video details.",
+        "example": "https://your-api-url.com/video-info?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    }
+
+# --- VideoInfo API Resource ---
 class VideoInfo(Resource):
     """
     API resource to get YouTube video information.
