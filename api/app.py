@@ -26,7 +26,7 @@ class YouTubeService:
 
     def get_video_info(self, url):
         try:
-            ydl_opts = {
+            ydl_opts: dict = {
                 'quiet': True,
                 'no_warnings': True,
                 'extract_flat': False,
@@ -141,16 +141,15 @@ class YouTubeService:
             raise Exception(f"Failed to extract video information: {str(e)}")
 
 
+youtube_service = YouTubeService()
+
 def create_app():
     app = Flask(__name__, template_folder='templates')
     app.secret_key = os.environ.get("SESSION_SECRET", "youtube-downloader-secret-key")
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
-
-    app.youtube_service = YouTubeService()
     return app
 
 app = create_app()
-youtube_service = app.youtube_service
 
 
 @app.route('/')
