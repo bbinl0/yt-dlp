@@ -19,17 +19,23 @@ class YouTubeService:
         """Copy cookies.txt to /tmp for serverless environments (Vercel)"""
         cookies_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
         
+        logging.info(f"Looking for cookies at: {cookies_file}")
+        
         if not os.path.exists(cookies_file):
+            logging.warning(f"Cookies file not found at {cookies_file}")
             return None
         
         file_size = os.path.getsize(cookies_file)
+        logging.info(f"Found cookies file, size: {file_size} bytes")
+        
         if file_size <= 100:
+            logging.warning(f"Cookies file too small ({file_size} bytes)")
             return None
         
         tmp_cookies = os.path.join(tempfile.gettempdir(), 'cookies.txt')
         try:
             shutil.copy2(cookies_file, tmp_cookies)
-            logging.info(f"Copied cookies to {tmp_cookies}")
+            logging.info(f"Successfully copied cookies to {tmp_cookies}")
             return tmp_cookies
         except Exception as e:
             logging.error(f"Failed to copy cookies: {e}")
