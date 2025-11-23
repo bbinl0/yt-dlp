@@ -2,6 +2,8 @@ import os
 import logging
 import re
 import yt_dlp
+import shutil
+import tempfile
 from flask import Flask, jsonify, request
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -12,6 +14,26 @@ class YouTubeService:
 
     def __init__(self):
         logging.info("YouTube service initialized")
+    
+    def _get_writable_cookies_path(self):
+        """Copy cookies.txt to /tmp for serverless environments (Vercel)"""
+        cookies_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
+        
+        if not os.path.exists(cookies_file):
+            return None
+        
+        file_size = os.path.getsize(cookies_file)
+        if file_size <= 100:
+            return None
+        
+        tmp_cookies = os.path.join(tempfile.gettempdir(), 'cookies.txt')
+        try:
+            shutil.copy2(cookies_file, tmp_cookies)
+            logging.info(f"Copied cookies to {tmp_cookies}")
+            return tmp_cookies
+        except Exception as e:
+            logging.error(f"Failed to copy cookies: {e}")
+            return None
 
     def is_valid_youtube_url(self, url):
         youtube_regex = re.compile(
@@ -35,16 +57,13 @@ class YouTubeService:
                     info = ydl.extract_info(url, download=False)
             except Exception as e:
                 logging.warning(f"Failed to get video info without cookies: {e}")
-                cookies_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
-                if os.path.exists(cookies_file):
-                    file_size = os.path.getsize(cookies_file)
-                    if file_size > 100:
-                        logging.info("Retrying with cookies.txt")
-                        ydl_opts['cookiefile'] = cookies_file
-                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                            info = ydl.extract_info(url, download=False)
-                    else:
-                        raise Exception("cookies.txt is empty. Please add your YouTube cookies.")
+                writable_cookies = self._get_writable_cookies_path()
+                if writable_cookies:
+                    logging.info("Retrying with cookies.txt")
+                    ydl_opts['cookiefile'] = writable_cookies
+                    ydl_opts['cookiejar'] = os.path.join(tempfile.gettempdir(), 'cookiejar.txt')
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        info = ydl.extract_info(url, download=False)
                 else:
                     raise e
 
