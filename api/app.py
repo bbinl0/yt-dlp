@@ -25,6 +25,8 @@ class YouTubeService:
                 'quiet': True,
                 'no_warnings': True,
                 'extract_flat': False,
+                'cachedir': '/tmp/yt-dlp-cache',
+                'no_cache_dir': False,
             }
 
             info = None
