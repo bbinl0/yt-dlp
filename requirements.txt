@@ -1,6 +1,6 @@
 flask
 youtube-dl
-yt_dlp
+yt-dlp
 serverless-wsgi
 werkzeug
 urllib3
