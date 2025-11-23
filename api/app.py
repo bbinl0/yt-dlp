@@ -226,6 +226,39 @@ def health_check():
         'version': '1.0.0'
     })
 
+@app.route('/debug/cookies')
+def debug_cookies():
+    """Debug endpoint to check cookies file status"""
+    cookies_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
+    
+    debug_info = {
+        'cookies_path': cookies_file,
+        'file_exists': os.path.exists(cookies_file),
+        'current_dir': os.getcwd(),
+        'file_location': os.path.dirname(__file__),
+        'parent_dir': os.path.dirname(os.path.dirname(__file__)),
+        'temp_dir': tempfile.gettempdir(),
+    }
+    
+    if os.path.exists(cookies_file):
+        debug_info['file_size'] = os.path.getsize(cookies_file)
+        debug_info['readable'] = os.access(cookies_file, os.R_OK)
+        try:
+            with open(cookies_file, 'r') as f:
+                lines = f.readlines()
+                debug_info['line_count'] = len(lines)
+                debug_info['first_line'] = lines[0].strip() if lines else 'empty'
+        except Exception as e:
+            debug_info['read_error'] = str(e)
+    
+    try:
+        files_in_parent = os.listdir(os.path.dirname(os.path.dirname(__file__)))
+        debug_info['files_in_parent'] = files_in_parent
+    except Exception as e:
+        debug_info['list_error'] = str(e)
+    
+    return jsonify(debug_info)
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
