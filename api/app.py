@@ -2,13 +2,8 @@ import os
 import logging
 import re
 import yt_dlp
-from flask import Flask, jsonify, request, render_template, send_file, abort
+from flask import Flask, jsonify, request
 from werkzeug.middleware.proxy_fix import ProxyFix
-from urllib.parse import urlparse
-from serverless_wsgi import handle_request
-import tempfile
-import threading
-import time
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -38,7 +33,7 @@ class YouTubeService:
                     info = ydl.extract_info(url, download=False)
             except Exception as e:
                 logging.warning(f"Failed to get video info without cookies: {e}")
-                cookies_file = 'cookies.txt'
+                cookies_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
                 if os.path.exists(cookies_file):
                     file_size = os.path.getsize(cookies_file)
                     if file_size > 100:
@@ -218,9 +213,6 @@ def internal_error(error):
         'success': False
     }), 500
 
-
-def handler(event, context):
-    return handle_request(app, event, context)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
