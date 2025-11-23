@@ -1,8 +1,4 @@
 flask
-youtube-dl
 yt-dlp
-serverless-wsgi
 werkzeug
-urllib3
 requests
-gunicorn
